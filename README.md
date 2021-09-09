@@ -1,6 +1,6 @@
 # multiverse chess
 
-This is the source code behind [multiversechess.com](https://multiversechess.com/). Feel free to join the (multiverse chess discord)[https://discord.gg/UgVKykY]!
+This is the source code behind [multiversechess.com](https://multiversechess.com/). Heroku is used as free hosting. Feel free to join the (multiverse chess discord)[https://discord.gg/UgVKykY]!
 
 
 The game logic is ran by both the client and the server, for this reason the decision was made to use nodejs for backend.  
