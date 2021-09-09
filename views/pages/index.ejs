@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<% include ../partials/header.ejs %>
+</head>
+<body>
+	<% include ../partials/templates.ejs %>
+	<chess-menu-root>
+		<chess-menu-container>
+			<chess-menu-tabs>
+				<chess-menu-tab menu-page="join" disabled></chess-menu-tab>
+				<chess-menu-tab menu-page="create"></chess-menu-tab>
+				<chess-menu-tab menu-page="spectate" disabled inactive></chess-menu-tab>
+				<chess-menu-tab menu-page="ranked" disabled inactive></chess-menu-tab>
+				<chess-menu-tab menu-page="settings"></chess-menu-tab>
+			</chess-menu-tabs>
+			<chess-menu>
+				<chess-menu-join connecting>
+					<chess-menu-games></chess-menu-games>
+					<label class="chess-menu-join-code">
+						<input type="text" class="" maxlength="3" spellcheck="false">
+						<chess-menu-join-code-enter></chess-menu-join-code-enter>
+					</label>
+				</chess-menu-join>
+				<chess-menu-create>
+					<chess-menu-mode>mode: standard</chess-menu-mode>
+					<chess-menu-time-controls>
+						<chess-menu-time-controls-enable>
+							<input type="checkbox">
+							<span>time controls: </span>
+						</chess-menu-time-controls-enable>
+						<chess-menu-range><span data-label="base time"></span><input type="range" min="1" max="90" name="start"></chess-menu-range>
+						<chess-menu-range><span data-label="flat increment"></span><input type="range" min="0" max="45" name="incr"></chess-menu-range>
+						<chess-menu-range><span data-label="scaling increment"></span><input type="range" min="0" max="45" name="incrScale"></chess-menu-range>
+						<chess-menu-range><span data-label="flat grace"></span><input type="range" min="0" max="45" name="grace"></chess-menu-range>
+						<chess-menu-range><span data-label="scaling grace"></span><input type="range" min="0" max="45" name="graceScale"></chess-menu-range>
+					</chess-menu-time-controls>
+					<chess-button-row>
+						<chess-button class="create-button" game-type="public" disabled>public</chess-button>
+						<chess-button class="create-button" game-type="private" disabled>private</chess-button>
+						<chess-button class="create-button" game-type="local">local</chess-button>
+					</chess-button-row>
+				</chess-menu-create>
+				<chess-menu-settings>
+				</chess-menu-settings>
+			</chess-menu>
+		</chess-menu-container>
+		<a href="https://discord.gg/UgVKykY" target="_blank"><chess-button class="discord-button"></chess-button></a>
+	</chess-menu-root>
+</body>
+</html>
