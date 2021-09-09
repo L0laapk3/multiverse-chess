@@ -11,7 +11,7 @@
     "test": "node test.js"
   },
   "dependencies": {
-    "discord.js": "^12.5.1",
+    "discord.js": "^12.5.3",
     "ejs": "^2.7.4",
     "express": "^4.17.1",
     "socket.io": "^2.3.0",

@@ -13,19 +13,26 @@ const UNSUBSCRIBE_REACT = '🔕'; //'😴';
 let connected = false;
 let lastGames = [];
 
+
+function isSuitableChannel(guild, channel) {
+	if (channel.type != "text" || channel.deleted || !channel.topic || !channel.topic.toLowerCase().includes("https://multiversechess.com"))
+		return false;
+	if (!guild.me.permissionsIn(channel).has(Discord.Permissions.FLAGS.VIEW_CHANNEL | Discord.Permissions.FLAGS.SEND_MESSAGES | Discord.Permissions.FLAGS.ADD_REACTIONS))
+		return false;
+	return true;
+}
+
 client.on("ready", async _ => {
 	connected = true;
 		
 	await Promise.all(client.guilds.cache.map(async (guild, guid) => {
 		try {
 			for (const [cuid, channel] of guild.channels.cache) {
-				if (channel.type != "text" || channel.deleted || !channel.topic || !channel.topic.toLowerCase().includes("https://multiversechess.com"))
+				if (!isSuitableChannel(guild, channel))
 					continue;
 
-				let messageError = false;
-				const messages = await channel.messages.fetch({ limit: 50 }).catch(_ => messageError = true);
-				if (messageError)
-					continue;
+				const messages = await channel.messages.fetch({ limit: 50 }).catch(console.error);
+
 				const lastSelfMessage = messages.find(m => m.author && m.author.id == client.user.id);
 				if (lastSelfMessage)
 					existingMessages[guid] = new Promise(resolve => resolve(lastSelfMessage));
@@ -130,26 +137,14 @@ function broadcast(silent) {
 		}
 
 		for (const [cuid, channel] of guild.channels.cache) {
-			if (channel.type != "text" || channel.deleted || !channel.topic || !channel.topic.toLowerCase().includes("https://multiversechess.com"))
+			if (!isSuitableChannel(guild, channel))
 				continue;
 			
 			const role = getInviteRole(guild);
 			let sendError = false;
-			const msg = channel.send(lastGames.length ? `<@&${role.id}>` : '', { embed: createEmbed() }).catch(ex => {
-				sendError = true;
-				console.error(`Could not send game list message in guild '${guild.name}', channel '${channel.name}':`);
-				console.error(ex);
-			});
+			const msg = channel.send(lastGames.length ? `<@&${role.id}>` : '', { embed: createEmbed() }).catch(console.error);
 			existingMessages[guid] = msg;
-			msg.then(msg => {
-				let reactError = false;
-				if (!sendError)
-					msg.react(SUBSCRIBE_REACT).then(_ => { if (!reactError) msg.react(UNSUBSCRIBE_REACT).catch(console.error); }).catch(ex => {
-						reactError = true;
-						console.error(`Could not react to message in guild '${guild.name}', channel '${channel.name}':`);
-						console.error(ex);
-					});
-			});
+			msg.then(msg => msg.react(SUBSCRIBE_REACT).then(_ => msg.react(UNSUBSCRIBE_REACT).catch(console.error)).catch(console.error))
 			break;
 		}
 	}
