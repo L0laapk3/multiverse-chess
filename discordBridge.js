@@ -15,7 +15,7 @@ let lastGames = [];
 
 
 function isSuitableChannel(guild, channel) {
-	if (channel.type != "text" || channel.deleted || !channel.topic || !channel.topic.toLowerCase().includes("https://multiversechess.com"))
+	if (channel.type != "text" || channel.deleted)
 		return false;
 	if (!guild.me.permissionsIn(channel).has(Discord.Permissions.FLAGS.VIEW_CHANNEL | Discord.Permissions.FLAGS.SEND_MESSAGES | Discord.Permissions.FLAGS.ADD_REACTIONS))
 		return false;
