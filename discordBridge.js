@@ -17,7 +17,7 @@ let lastGames = [];
 function isSuitableChannel(guild, channel) {
 	if (channel.type != "text" || channel.deleted)
 		return false;
-	if (!guild.me.permissionsIn(channel).has(Discord.Permissions.FLAGS.VIEW_CHANNEL | Discord.Permissions.FLAGS.SEND_MESSAGES | Discord.Permissions.FLAGS.ADD_REACTIONS))
+	if (!guild.me.permissionsIn(channel).has(Discord.Permissions.FLAGS.VIEW_CHANNEL | Discord.Permissions.FLAGS.SEND_MESSAGES | Discord.Permissions.FLAGS.ADD_REACTIONS | Discord.Permissions.FLAGS.MANAGE_CHANNELS))
 		return false;
 	return true;
 }
@@ -27,6 +27,8 @@ client.on("ready", async _ => {
 		
 	await Promise.all(client.guilds.cache.map(async (guild, guid) => {
 		try {
+			if (!guild.me.hasPermission(Discord.Permissions.FLAGS.MANAGE_ROLES))
+				return console.error(`No MANAGE_ROLES permission in guild '${guild.name}'!`);
 			for (const [cuid, channel] of guild.channels.cache) {
 				if (!isSuitableChannel(guild, channel))
 					continue;
@@ -40,7 +42,7 @@ client.on("ready", async _ => {
 				console.log(`found channel '${channel.name}' in guild '${guild.name}'`);
 				return;
 			}
-			console.log(`could not find channel in guild '${guild.name}'`);
+			console.log(`could not find channelin guild '${guild.name}'! (with required permissions)`);
 		} catch (ex) {
 			console.error(ex);
 		}
