@@ -17,16 +17,25 @@ client.on("ready", async _ => {
 	connected = true;
 		
 	await Promise.all(client.guilds.cache.map(async (guild, guid) => {
-		for (const [cuid, channel] of guild.channels.cache) {
-			if (channel.type != "text" || channel.deleted || !channel.topic || !channel.topic.toLowerCase().includes("https://multiversechess.com"))
-				continue;
+		try {
+			for (const [cuid, channel] of guild.channels.cache) {
+				if (channel.type != "text" || channel.deleted || !channel.topic || !channel.topic.toLowerCase().includes("https://multiversechess.com"))
+					continue;
 
-			const messages = await channel.messages.fetch({ limit: 50 }).catch(console.error);
-			const lastSelfMessage = messages.find(m => m.author && m.author.id == client.user.id);
-			if (lastSelfMessage)
-				existingMessages[guid] = new Promise(resolve => resolve(lastSelfMessage));
+				let messageError = false;
+				const messages = await channel.messages.fetch({ limit: 50 }).catch(_ => messageError = true);
+				if (messageError)
+					continue;
+				const lastSelfMessage = messages.find(m => m.author && m.author.id == client.user.id);
+				if (lastSelfMessage)
+					existingMessages[guid] = new Promise(resolve => resolve(lastSelfMessage));
 
-			break;
+				console.log(`found channel '${channel.name}' in guild '${guild.name}'`);
+				return;
+			}
+			console.log(`could not find channel in guild '${guild.name}'`);
+		} catch (ex) {
+			console.error(ex);
 		}
 	}));
 	
@@ -125,9 +134,22 @@ function broadcast(silent) {
 				continue;
 			
 			const role = getInviteRole(guild);
-			const msg = channel.send(lastGames.length ? `<@&${role.id}>` : '', { embed: createEmbed() }).catch(console.error);
+			let sendError = false;
+			const msg = channel.send(lastGames.length ? `<@&${role.id}>` : '', { embed: createEmbed() }).catch(ex => {
+				sendError = true;
+				console.error(`Could not send game list message in guild '${guild.name}':`);
+				console.error(ex);
+			});
 			existingMessages[guid] = msg;
-			msg.then(msg => msg.react(SUBSCRIBE_REACT).then(_ => msg.react(UNSUBSCRIBE_REACT).catch(console.error))).catch(console.error);
+			msg.then(msg => {
+				let reactError = false;
+				if (!sendError)
+					msg.react(SUBSCRIBE_REACT).then(_ => { if (!reactError) msg.react(UNSUBSCRIBE_REACT).catch(console.error); }).catch(ex => {
+						reactError = true;
+						console.error(`Could not react to message in guild '${guild.name}':`);
+						console.error(ex);
+					});
+			});
 			break;
 		}
 	}
