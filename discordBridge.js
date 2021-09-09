@@ -14,48 +14,73 @@ let connected = false;
 let lastGames = [];
 
 
-function isSuitableChannel(guild, channel) {
+function isSuitableChannel(channel) {
 	if (channel.type != "text" || channel.deleted)
 		return false;
-	if (!guild.me.permissionsIn(channel).has(Discord.Permissions.FLAGS.VIEW_CHANNEL | Discord.Permissions.FLAGS.SEND_MESSAGES | Discord.Permissions.FLAGS.ADD_REACTIONS | Discord.Permissions.FLAGS.MANAGE_CHANNELS))
+	if (!channel.guild.me.permissionsIn(channel).has(Discord.Permissions.FLAGS.VIEW_CHANNEL | Discord.Permissions.FLAGS.SEND_MESSAGES | Discord.Permissions.FLAGS.ADD_REACTIONS | Discord.Permissions.FLAGS.MANAGE_CHANNELS))
 		return false;
 	return true;
 }
 
+function getInviteRole(guild) {
+	const role = guild.me.roles.cache.find(role => role.editable && role.name.toLowerCase().includes("invite"));
+	if (!role)
+		console.error(`could not find invite role in guild '${guild.name}'!`);
+	return role;
+}
+
+async function initializeGuild(guild) {
+	const guid = guild.id;
+	try {
+		if (!guild.me.hasPermission(Discord.Permissions.FLAGS.MANAGE_ROLES))
+			return console.error(`No MANAGE_ROLES permission in guild '${guild.name}'!`);
+		if (!getInviteRole(guild))
+			return;
+
+		for (const [cuid, channel] of guild.channels.cache) {
+			if (!isSuitableChannel(channel))
+				continue;
+
+			const messages = await channel.messages.fetch({ limit: 50 }).catch(console.error);
+
+			const lastSelfMessage = messages.find(m => m.author && m.author.id == client.user.id);
+			if (lastSelfMessage)
+				existingMessages[guid] = new Promise(resolve => resolve(lastSelfMessage));
+
+			console.log(`found channel '${channel.name}' in guild '${guild.name}'.`);
+			broadcastToGuild(guild, true);
+
+			return;
+		}
+		console.log(`could not find channel in guild '${guild.name}' with required permissions!`);
+		existingMessages[guid] = undefined;
+	} catch (ex) {
+		console.error(ex);
+	}
+}
+
+client.on("roleUpdate", (_, role) => {
+    if (role.members.get(role.guild.me.id))
+		initializeGuild(role.guild);
+});
+
+client.on("channelUpdate", (_, channel) => {
+    initializeGuild(channel.guild);
+});
+
+client.on("guildMemberUpdate", (_, member) => {
+	console.log(member.id);
+    if (member.id == member.guild.me.id)
+		initializeGuild(member.guild);
+});
+
 client.on("ready", async _ => {
 	connected = true;
 		
-	await Promise.all(client.guilds.cache.map(async (guild, guid) => {
-		try {
-			if (!guild.me.hasPermission(Discord.Permissions.FLAGS.MANAGE_ROLES))
-				return console.error(`No MANAGE_ROLES permission in guild '${guild.name}'!`);
-			for (const [cuid, channel] of guild.channels.cache) {
-				if (!isSuitableChannel(guild, channel))
-					continue;
-
-				const messages = await channel.messages.fetch({ limit: 50 }).catch(console.error);
-
-				const lastSelfMessage = messages.find(m => m.author && m.author.id == client.user.id);
-				if (lastSelfMessage)
-					existingMessages[guid] = new Promise(resolve => resolve(lastSelfMessage));
-
-				console.log(`found channel '${channel.name}' in guild '${guild.name}'`);
-				return;
-			}
-			console.log(`could not find channelin guild '${guild.name}'! (with required permissions)`);
-		} catch (ex) {
-			console.error(ex);
-		}
-	}));
-	
-	broadcast(true);
+	await Promise.all(client.guilds.cache.map(initializeGuild));
 });
 
 client.login(TOKEN);
-
-function getInviteRole(guild) {
-	return guild.roles.cache.find(role => role.name.toLowerCase().includes("invite"));
-}
 
 function handleReact(reaction, user, added) {
 	if (reaction.message.member && reaction.message.member.id == client.user.id && !reaction.me) {		
@@ -122,34 +147,39 @@ function createEmbed() {
 	return embed;
 }
 
-function broadcast(silent) {
-	for (const [guid, guild] of client.guilds.cache) {
-		if (existingMessages[guid]) {
-			if (silent) {
-				existingMessages[guid].then(message => {
-					message.edit(createEmbed()).catch(console.error);
-				});
-				continue;
-			} else {
-				existingMessages[guid].then(message => {
-					message.delete().catch(console.error);
-				});
-			}
-
+function broadcastToGuild(guild, silent) {
+	const guid = guild.id;
+	if (existingMessages[guid]) {
+		if (silent) {
+			existingMessages[guid].then(message => {
+				message.edit(createEmbed()).catch(console.error);
+			});
+			return;
+		} else {
+			existingMessages[guid].then(message => {
+				message.delete().catch(console.error);
+			});
 		}
 
-		for (const [cuid, channel] of guild.channels.cache) {
-			if (!isSuitableChannel(guild, channel))
-				continue;
-			
-			const role = getInviteRole(guild);
-			let sendError = false;
+	}
+
+	for (const [cuid, channel] of guild.channels.cache) {
+		if (!isSuitableChannel(channel))
+			continue;
+		
+		const role = getInviteRole(guild);
+		if (role) {
 			const msg = channel.send(lastGames.length ? `<@&${role.id}>` : '', { embed: createEmbed() }).catch(console.error);
 			existingMessages[guid] = msg;
 			msg.then(msg => msg.react(SUBSCRIBE_REACT).then(_ => msg.react(UNSUBSCRIBE_REACT).catch(console.error)).catch(console.error))
 			break;
 		}
 	}
+}
+
+function broadcast(silent) {
+	for (const [guid, guild] of client.guilds.cache)
+		broadcastToGuild(guild, silent);
 }
 
 
