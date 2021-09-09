@@ -137,7 +137,7 @@ function broadcast(silent) {
 			let sendError = false;
 			const msg = channel.send(lastGames.length ? `<@&${role.id}>` : '', { embed: createEmbed() }).catch(ex => {
 				sendError = true;
-				console.error(`Could not send game list message in guild '${guild.name}':`);
+				console.error(`Could not send game list message in guild '${guild.name}', channel '${channel.name}':`);
 				console.error(ex);
 			});
 			existingMessages[guid] = msg;
@@ -146,7 +146,7 @@ function broadcast(silent) {
 				if (!sendError)
 					msg.react(SUBSCRIBE_REACT).then(_ => { if (!reactError) msg.react(UNSUBSCRIBE_REACT).catch(console.error); }).catch(ex => {
 						reactError = true;
-						console.error(`Could not react to message in guild '${guild.name}':`);
+						console.error(`Could not react to message in guild '${guild.name}', channel '${channel.name}':`);
 						console.error(ex);
 					});
 			});
