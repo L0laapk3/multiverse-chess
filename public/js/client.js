@@ -509,6 +509,7 @@ class Chat {
 			this.inputEl.setAttribute("placeholder", game.options.player == -1 ? "Send a message" : "Send a message to your opponent");
 			this.inputEl.setAttribute("wrap", "soft");
 			this.inputEl.setAttribute("maxlength", "255");
+			this.inputEl.setAttribute("enterkeyhint", "send");
 			this.inputEl.onkeydown = e => {
 				this.send(e);
 				this.resizeText(e);
@@ -538,6 +539,7 @@ class Chat {
 		});
 	}
 	send(e) {
+		console.log(e);
 		if (e && (e.code != "Enter" || e.shiftKey) || !this.online)
 			return;
 		e.preventDefault();

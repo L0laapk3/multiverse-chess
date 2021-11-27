@@ -149,7 +149,7 @@ class Wrapper {
 		gameForClient.player = -1;
 		for (let i = 2; i < this._sockets.length; i++)
 			this._sockets[i].emit("game-launch", gameForClient, this.serializePlayer(this._sockets[i]));
-		updateDiscord(false);
+		updateDiscord(false, false);
 	}
 	rejoin(socket) {
 		clearTimeout(this.destroyTimer);
@@ -254,6 +254,7 @@ class Wrapper {
 				throw Error("unknown game end reason");
 		}
 		this.finished = true;
+		updateDiscord(true, false);
 		this.winner = winner;
 		this.winCause = player;
 		this.winReason = reason;
