@@ -506,7 +506,7 @@ class Chat {
 			this.el.append(submitEl);
 	
 			this.inputEl = document.createElement("textarea");
-			this.inputEl.setAttribute("placeholder", "Send a message to your opponent");
+			this.inputEl.setAttribute("placeholder", game.options.player == -1 ? "Send a message" : "Send a message to your opponent");
 			this.inputEl.setAttribute("wrap", "soft");
 			this.inputEl.setAttribute("maxlength", "255");
 			this.inputEl.onkeydown = e => {

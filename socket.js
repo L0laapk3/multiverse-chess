@@ -144,10 +144,11 @@ class Wrapper {
 		this._sockets[this._playerOneColor].hostedGame = undefined;
 		this.started = true;
 		const gameForClient = this.serialize();
-		for (let i = 2; i < this._sockets.length; i++)
-			this._sockets[i].emit("game-launch", gameForClient, this.serializePlayer(this._sockets[i]));
 		for (gameForClient.player = 0; gameForClient.player < 2; gameForClient.player++)
 			this._sockets[gameForClient.player].emit("game-launch", gameForClient, gameForClient.players[gameForClient.player]);
+		gameForClient.player = -1;
+		for (let i = 2; i < this._sockets.length; i++)
+			this._sockets[i].emit("game-launch", gameForClient, this.serializePlayer(this._sockets[i]));
 		updateDiscord(false);
 	}
 	rejoin(socket) {
