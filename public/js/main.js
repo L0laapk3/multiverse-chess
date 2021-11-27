@@ -38,11 +38,11 @@ socket.on("disconnect", _ => {
 	window.menu.disconnectedOnline();
 });
 
-socket.on("game-launch", options => {
+socket.on("game-launch", (options, me) => {
 	options.isOnline = true;
-	startGame(options);
+	startGame(options, me);
 });
-function startGame(options) {
+function startGame(options, me) {
 	if (!loaded)
 		return gameOptions = options || {};
 	if (window.game)
@@ -50,7 +50,7 @@ function startGame(options) {
 	window.menu.el.setAttribute("hidden", "");
 	if (options.isOnline && window.location.pathname != "/" + options.shortCode)
 		window.history.pushState(options.shortCode, "", "/" + options.shortCode);
-	window.game = new ClientGame(document.body, options, options.isOnline && socket);
+	window.game = new ClientGame(document.body, options, options.isOnline && socket, me);
 }
 
 window.onpopstate = e => location.reload(); // TODO: proper way, this will do for now tho

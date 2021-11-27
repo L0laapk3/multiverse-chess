@@ -1,11 +1,11 @@
-module.exports = function (server, VERSION) {
+module.exports = function(server, VERSION, IS_DEV) {
 
 const UUID = require('uuid');
 const io = require("socket.io")(server);
 const {
 	performance
 } = require('perf_hooks');
-const discord = require('./discordBridge');
+const discord = require('./discordBridge')(IS_DEV);
 
 const { uniqueNamesGenerator, adjectives, animals } = require('unique-names-generator');
 
@@ -145,52 +145,72 @@ class Wrapper {
 		this.started = true;
 		const gameForClient = this.serialize();
 		for (let i = 2; i < this._sockets.length; i++)
-			this._sockets[i].emit("game-launch", gameForClient);
-		gameForClient.player = 0;
-		this._sockets[0].emit("game-launch", gameForClient);
-		gameForClient.player = 1;
-		this._sockets[1].emit("game-launch", gameForClient);
+			this._sockets[i].emit("game-launch", gameForClient, this.serializePlayer(this._sockets[i]));
+		for (gameForClient.player = 0; gameForClient.player < 2; gameForClient.player++)
+			this._sockets[gameForClient.player].emit("game-launch", gameForClient, gameForClient.players[gameForClient.player]);
+		updateDiscord(false);
 	}
 	rejoin(socket) {
 		clearTimeout(this.destroyTimer);
-		if (!this.finished)
-			this.registerMessage(-1, socket, "reconnected");
+		this.registerMessage(-1, socket, "reconnected");
 		const gameForClient = this.serialize();
 		gameForClient.player = socket.uuid == this._playerUuids[1] ? 1 : 0;
 		this._sockets[gameForClient.player] = socket;
 		socket.connectedGames.push(this);
 		if (this._timeIndexes[gameForClient.player] > 0)
 			this._timeIndexes[gameForClient.player] = 0;
-		socket.emit("game-launch", gameForClient);
+		socket.emit("game-launch", gameForClient, gameForClient.players[gameForClient.player]);
+	}
+	spectate(socket) {
+		let i = 0;
+		for (; i < this._sockets.length; i++)
+			if (this._sockets[i] && this._sockets[i].uuid == socket.uuid)
+				break;
+		if (i < this._sockets.length) {
+			console.warn("socket tried to spectate but is already watching game.", socket, this);
+			return;
+		}
+		this.registerMessage(-1, socket, "started spectating");
+		const gameForClient = this.serialize();
+		this._sockets[i] = socket;
+		socket.connectedGames.push(this);
+		socket.emit("game-launch", gameForClient, this.serializePlayer(socket));
 	}
 	disconnect(socket) {
 		const gameIndex = socket.connectedGames.indexOf(this);
-		if (gameIndex == -1)
-			throw Error("player not connected to game", socket, this);
+		if (gameIndex == -1) {
+			console.warn("player tried to disconnect but not connected to game", socket, this);
+			return;
+		}
 		socket.connectedGames.splice(gameIndex, 1);
 		let i = 0;
 		for (; i < this._sockets.length; i++)
 			if (this._sockets[i] && this._sockets[i].uuid == socket.uuid)
 				break;
 		if (i >= this._sockets.length)
-			console.error("player not found in game?!", socket, this);
+			throw Error("socket.connectedGames and game.sockets mismatch", socket, this);
 		else {
 			if (i < 2)
 				this._sockets[i] = undefined;
 			else
 				this._sockets.splice(i, 1);
 		}
-		if (!this.finished)
+		console.log(this._playerUuids, socket.uuid);
+		const isSpectator = this._playerUuids.indexOf(socket.uuid) == -1;
+		if (isSpectator) {
+			this.registerMessage(-1, socket, "stopped spectating");
+		} else {
 			this.registerMessage(-1, socket, "disconnected");
-		if (!this.runningClocks) {
-			let anyConnectionsRemaining = false;
-			for (let socket of this._sockets)
-				if (socket) {
-					anyConnectionsRemaining = true;
-					break;
-				}
-			if (!anyConnectionsRemaining)
-				this.destroyTimer = setTimeout(_ => this.destroy(), 30000);
+			if (!this.runningClocks) {
+				let anyConnectionsRemaining = false;
+				for (let socket of this._sockets)
+					if (socket) {
+						anyConnectionsRemaining = true;
+						break;
+					}
+				if (!anyConnectionsRemaining)
+					this.destroyTimer = setTimeout(_ => this.destroy(), 30000);
+			}
 		}
 	}
 	endHook(winner, cause, reason) {
@@ -247,15 +267,11 @@ class Wrapper {
 		delete games[this.id];
 		if (this.public)
 			updateSubscribers(false);
+		updateDiscord(true, false);
 		for (let socket of this._sockets)
 			if (socket)
 				this.disconnect(socket);
 	}
-	// spectate(socket) {
-	// 	this._spectators.push(socket);
-	// 	this._sockets[0].emit("game-launch", this.serialize());
-	// 	// TODO
-	// }
 	serialize() {
 		const result = { };
 		for (const [k, v] of Object.entries(this))
@@ -282,13 +298,17 @@ class Wrapper {
 		return obj;
 	}
 	list() {
-		return {
+		const friendlyObj = {
 			opponent: this.players[this._playerOneColor],
 			id: this.id,
 			shortCode: this.shortCode,
 			time: this.time,
 			mode: this.mode,
-		}
+			started: this.started,
+		};
+		if (this.started)
+			friendlyObj.players = this.players;
+		return friendlyObj;
 	}
 	registerMessage(playerIndex, socket, message, chatId, dontSend) {
 		const playerInfo = this.serializePlayer(socket);
@@ -322,9 +342,11 @@ function sendGamesList(list, socket) {
 }
 function updateSubscribers(created) {
 	const list = listGames();
-	discord.update(list, created);
 	for (let socket of subscribers)
 		sendGamesList(list, socket);
+}
+function updateDiscord(silent, ping) {
+	discord.update(Object.values(games).filter(g => (g.public || g.started) && !g.finished).map(g => g.list()), silent, ping);
 }
 
 
@@ -335,14 +357,14 @@ io.on("connection", socket => {
 	socket.on("uuid", uuid => {
 		socket.uuid = uuid;
 		socket.name = socket.uuid == "647775f8-3b8f-4a47-9744-f24bb24fbdfb" ? "L0laapk3" : uniqueNamesGenerator({ dictionaries: [adjectives, animals], seed: parseInt(socket.uuid, 16) });
-		socket.avatar = uuid == "647775f8-3b8f-4a47-9744-f24bb24fbdfb" ? "https://cdn.discordapp.com/avatars/180017294657716225/675f55c8176dccb649bb98fe10b3eaf4.png" : undefined;
+		socket.avatar = uuid == "647775f8-3b8f-4a47-9744-f24bb24fbdfb" ? "https://i.imgur.com/XUso8bL.jpg" : undefined;
 		if (!checkUuid())
 			return;
 		socket.emit("uuid-ok");
 	});
 	function newUuid() {
 		socket.uuid = UUID.v4();
-		socket.name = socket.uuid == "647775f8-3b8f-4a47-9744-f24bb24fbdfb" ? "L0laapk3" : uniqueNamesGenerator({ dictionaries: [adjectives, animals], seed: parseInt(socket.uuid, 16) });
+		socket.name = uniqueNamesGenerator({ dictionaries: [adjectives, animals], seed: parseInt(socket.uuid, 16) });
 		socket.emit("uuid-new", socket.uuid);
 	}
 	function checkUuid() {
@@ -385,18 +407,14 @@ io.on("connection", socket => {
 	socket.on("matchmaking-create", (options, cb) => {
 		if (!checkUuid())
 			return;
-		let game;
-		try {
-			game = new Wrapper(socket, options);
-		} catch (ex) {
-			console.warn(ex);
-			socket.emit("generic-error", ex);
-		}
+		const game = new Wrapper(socket, options);
 		if (game) {
 			socket.hostedGame = game;
 			cb(game.id, game.shortCode);
-			if (game.public)
+			if (game.public) {
 				updateSubscribers(true);
+				updateDiscord(false, true);
+			}
 			subscribe(socket);
 		}
 	});
@@ -426,11 +444,12 @@ io.on("connection", socket => {
 			else
 				game.launch(socket);
 		} else {
-			if (game._playerUuids.indexOf(socket.uuid) > -1) {
+			if (!game.finished && game._playerUuids.indexOf(socket.uuid) > -1) {
 				game.rejoin(socket);
 			} else {
-				// todo: spectate
-				socket.emit("matchmaking-join-error", "Game is full.");
+				game.spectate(socket);
+				// // todo: spectate
+				// socket.emit("matchmaking-join-error", "Game is full.");
 			}
 		}
 	});
@@ -508,7 +527,7 @@ io.on("connection", socket => {
 			
 		const playerIndex = game._sockets.findIndex(s => s && s.uuid == socket.uuid);
 		if (playerIndex == -1)
-			throw Error("player not found in game somehow", playerIndex, game);
+			return socket.emit("generic-error", "You must be connected to a game to chat in it.");
 
 		game.registerMessage(playerIndex, socket, message, chatId);
 	});

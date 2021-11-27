@@ -546,7 +546,7 @@ class Chat {
 			const chatNr = localStorage.chatCount = parseInt(localStorage.chatCount) + 1 || 1;
 			const chatId = Math.floor(performance.now()) + chatNr;
 			this.game.socket.emit("game-chat", this.game.options.id, chatId, message);
-			this.createMessage(game.options.players[game.options.player], message, false, chatId)
+			this.createMessage(game.me, message, false, chatId)
 		}
 		this.inputEl.value = "";
 		this.inputLines = 1;
@@ -776,9 +776,10 @@ class ClientPlayer extends Player {
 }
 
 class ClientGame extends Game {
-	constructor(root, options, socket) {
+	constructor(root, options, socket, me) {
 		super(options, socket);
 		this.socket = socket;
+		this.me = me;
 		
 		this.presentEl.style.setProperty("--t", this.present);
 		

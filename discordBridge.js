@@ -1,3 +1,6 @@
+module.exports = function(IS_DEV) {
+
+
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const TOKEN = process.env.DISCORD_BOT_TOKEN;
@@ -7,7 +10,7 @@ const UNSUBSCRIBE_REACT = '🔕'; //'😴';
 
 
 // invite link
-// https://discord.com/api/oauth2/authorize?client_id=760107519971950643&permissions=268443648&redirect_uri=https%3A%2F%2Flocalhost%3A5000%2Flogin%2Fdiscord&scope=bot
+// https://discord.com/oauth2/authorize?client_id=760107519971950643&permissions=268443648&redirect_uri=&scope=bot
 
 
 let connected = false;
@@ -31,6 +34,8 @@ function getInviteRole(guild) {
 
 async function initializeGuild(guild) {
 	const guid = guild.id;
+	if (IS_DEV && guid != "763763925140635659")
+		return;
 	try {
 		if (!guild.me.hasPermission(Discord.Permissions.FLAGS.MANAGE_ROLES))
 			return console.error(`No MANAGE_ROLES permission in guild '${guild.name}'!`);
@@ -136,7 +141,10 @@ function createEmbed() {
 				timeStr = andSign + "0";
 			timeStr = (game.time.start[0] / 60000 % 60 == 0 ? game.time.start[0]/60/60/1000 + "h" : game.time.start[0] / 1000 % 60 == 0 ? game.time.start[0]/60/1000 : game.time.start[0]/1000 + "s") + timeStr; 
 		}
-		descriptions.push(`**[join](https://multiversechess.com/${game.shortCode})** - **${game.mode}** - **${timeStr}** - vs ${game.opponent.name}`);
+		if (!game.started)
+			descriptions.push(`**[join](https://multiversechess.com/${game.shortCode})** - **${game.mode}** - **${timeStr}** - vs ${game.opponent.name}`);
+		else
+			descriptions.push(`**[spectate](https://multiversechess.com/${game.shortCode})** - **${game.mode}** - **${timeStr}** - ${game.players[1].name} vs ${game.players[0].name}`);
 	}
 	if (lastGames.length == 0)
 		embed.setDescription("No games :(");
@@ -147,7 +155,7 @@ function createEmbed() {
 	return embed;
 }
 
-function broadcastToGuild(guild, silent) {
+function broadcastToGuild(guild, silent, ping) {
 	const guid = guild.id;
 	if (existingMessages[guid]) {
 		if (silent) {
@@ -169,24 +177,30 @@ function broadcastToGuild(guild, silent) {
 		
 		const role = getInviteRole(guild);
 		if (role) {
-			const msg = channel.send(lastGames.length ? `<@&${role.id}>` : '', { embed: createEmbed() }).catch(console.error);
+			const msg = channel.send(lastGames.length && ping ? `<@${IS_DEV ? '180017294657716225' : '&' + role.id}>` : '', { embed: createEmbed() }).catch(console.error);
 			existingMessages[guid] = msg;
-			msg.then(msg => msg.react(SUBSCRIBE_REACT).then(_ => msg.react(UNSUBSCRIBE_REACT).catch(console.error)).catch(console.error))
+			msg.then(msg => {
+				if (lastGames.length && !ping)
+					msg.edit({ content: `<@${IS_DEV ? '180017294657716225' : '&' + role.id}>`, embed: createEmbed() }).catch(console.error);
+				msg.react(SUBSCRIBE_REACT).then(_ => msg.react(UNSUBSCRIBE_REACT).catch(console.error)).catch(console.error)
+			});
 			break;
 		}
 	}
 }
 
-function broadcast(silent) {
+function broadcast(silent, ping) {
 	for (const [guid, guild] of client.guilds.cache)
-		broadcastToGuild(guild, silent);
+		broadcastToGuild(guild, silent, ping);
 }
 
 
-module.exports = {
-	update: function(games, added) {
+return {
+	update: function(games, silent, ping) {
 		lastGames = games;
 		if (connected)
-			broadcast(!added);
+			broadcast(silent, ping);
 	},
+};
+
 };

@@ -2,9 +2,9 @@ require("./keepAlive")
 
 const express = require('express');
 const path = require('path');
-const PORT = process.env.PORT || 5000;
-
-const VERSION = process.env.HEROKU_RELEASE_VERSION || ("dev-" + Date.now());
+const IS_DEV = !process.env.HEROKU_RELEASE_VERSION;
+const PORT = IS_DEV ? 5000 : process.env.PORT;
+const VERSION = IS_DEV ? "dev-" + Date.now() : process.env.HEROKU_RELEASE_VERSION;
 
 const app = express();
 
@@ -27,6 +27,6 @@ app.get('/', (req, res) => res.render('pages/index'));
 app.get('/[abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRTUVWXYZ2346789]{3}', (req, res) => res.render('pages/index'));
 const server = app.listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
-require("./socket")(server, VERSION);
+require("./socket")(server, VERSION, IS_DEV);
 
   
