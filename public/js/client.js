@@ -539,8 +539,7 @@ class Chat {
 		});
 	}
 	send(e) {
-		console.log(e);
-		if (e && (e.code != "Enter" || e.shiftKey) || !this.online)
+		if (e && (e.key != "Enter" || e.shiftKey) || !this.online)
 			return;
 		e.preventDefault();
 		const message = this.inputEl.value.trim();
