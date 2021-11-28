@@ -111,7 +111,7 @@ client.on("messageReactionAdd", (reaction, user) => handleReact(reaction, user, 
 let existingMessages = {};
 
 
-function createMessage(ping) {
+function createMessage(ping, roleId) {
 	const embed = new Discord.MessageEmbed();
 	// embed.setColor('#000000');
 	embed.setTitle('Public Games');
@@ -153,7 +153,7 @@ function createMessage(ping) {
 	// embed.setTimestamp();
 	embed.setFooter('multiversechess.com');
 	return {
-		content: (IS_DEV ? "THIS IS A TEST  " : "") + (ping ? `<@${IS_DEV ? '180017294657716225' : '&' + role.id}>` : ''),
+		content: (IS_DEV ? "THIS IS A TEST  " : "") + (ping ? `<@${IS_DEV ? '180017294657716225' : '&' + roleId}>` : ''),
 		embed: embed,
 	};
 }
@@ -162,8 +162,9 @@ function broadcastToGuild(guild, silent, ping) {
 	const guid = guild.id;
 	if (existingMessages[guid]) {
 		if (silent) {
+			const role = getInviteRole(guild);
 			existingMessages[guid].then(message => {
-				message.edit(createMessage().embed).catch(console.error);
+				message.edit(createMessage(false, role.id).embed).catch(console.error);
 			});
 			return;
 		} else {
@@ -180,11 +181,11 @@ function broadcastToGuild(guild, silent, ping) {
 		
 		const role = getInviteRole(guild);
 		if (role) {
-			const msg = channel.send(createMessage(ping && lastGames.length)).catch(console.error);
+			const msg = channel.send(createMessage(ping && lastGames.length, role.id)).catch(console.error);
 			existingMessages[guid] = msg;
 			msg.then(msg => {
 				if (lastGames.length && !ping)
-					msg.edit(createMessage(true)).catch(console.error);
+					msg.edit(createMessage(true, role.id)).catch(console.error);
 				msg.react(SUBSCRIBE_REACT).then(_ => msg.react(UNSUBSCRIBE_REACT).catch(console.error)).catch(console.error)
 			});
 			break;
