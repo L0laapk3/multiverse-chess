@@ -798,6 +798,9 @@ class ClientGame extends Game {
 		this.containerEl.append(this.panEl);
 		root.append(this.containerEl);
 		
+		
+		if (options.moves && options.moves.length && this.localPlayer[this.turn] && options.moves[options.moves.length - 1].length)
+			this.undoButton.removeAttribute("disabled");
 
 		// https://stackblitz.com/edit/multi-touch-trackpad-gesture?file=index.js
 		this.gestureStartScale = 0;

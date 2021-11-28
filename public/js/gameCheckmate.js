@@ -17,7 +17,7 @@ class WorkerGame extends Game {
 		return new WorkerPlayer(this, side);
 	}
 	startMateSearch() {
-		game.findChecks();
+		this.findChecks();
 		const gen = this.searchMate();
 		const loop = _ => {
 			const stopTime = performance.now() + 100;
@@ -36,8 +36,8 @@ class WorkerGame extends Game {
 	*searchMate() {
 		let checks = [];
 		for (let l = -Math.min(this.timelineCount[0], this.timelineCount[1] + 1); l <= Math.min(this.timelineCount[0] + 1, this.timelineCount[1]); l++) {
+			// add logic here.
 			if (!this.getTimeline(l).isSubmitReady()) {
-				this.canSubmit = false;
 				break;
 			}
 		}

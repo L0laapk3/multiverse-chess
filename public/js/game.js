@@ -362,8 +362,6 @@ class Game {
 			if (options.moves.length) {
 				this.executeMove("move", options.moves[options.moves.length - 1], 0, false);
 				// TODO: fix clocks
-				if (this.localPlayer[this.turn] && options.moves[options.moves.length - 1].length)
-					this.undoButton.removeAttribute("disabled");
 				this.checkSubmitAvailable();
 			}
 		}
