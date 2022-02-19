@@ -3,6 +3,8 @@
 This is the source code behind [multiversechess.com](https://multiversechess.com/). Heroku is used as free hosting. Feel free to join the [multiverse chess discord](https://discord.gg/UgVKykY)!
 
 
+note: If I were to start over, I would select WebGL (or js+canvas) for rendering. However, I wanted to see how far DOM could be pushed.
+
 The game logic is ran by both the client and the server, for this reason the decision was made to use nodejs for backend.  
 The client visualisation and animations are layered ontop of the game logic classes.
 
