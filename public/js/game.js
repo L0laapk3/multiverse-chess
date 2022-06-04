@@ -2,6 +2,11 @@
 
 
 class Vec4 {
+	// Note that the y coordinate increases horizontally (with the file)
+	// x coordinate increases with decreasing rank
+	// (white pieces begin at x coordinates 6 and 7, black pieces at 0 and 1)
+	// White Queen starts at (x=7,y=3), white King at (x=7,y=4)
+	// t coordinates increase by 1 each half turn
 	constructor(x, y, l, t) {
 		if (x.x !== undefined) {
 			y = x.y;
@@ -16,6 +21,9 @@ class Vec4 {
 	}
 	add(v) {
 		return new Vec4(this.x + v.x, this.y + v.y, this.l + v.l, this.t + v.t);
+	}
+	sub(v) {
+		return new Vec4(this.x - v.x, this.y - v.y, this.l - v.l, this.t - v.t);
 	}
 	equals(v) {
 		return v && this.x == v.x && this.y == v.y && this.l == v.l && this.t == v.t;

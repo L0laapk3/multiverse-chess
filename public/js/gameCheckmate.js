@@ -6,7 +6,20 @@
 // If the client were to tamper with this file and disable it, at best it could cause the client to not report a checkmate, but since there are no legal moves the only option would be for said client to time out.
 // Not sure if this idea is solid enough for real world. It can always be ran on the server too just in case, probably best to do this with a timelimit.
 
-self.importScripts("/js/gamePieces.js?" + self.location.search, "/js/game.js?" + self.location.search);
+self.importScripts("/js/gamePieces.js" + self.location.search
+                  ,"/js/game.js" + self.location.search
+                  ,"/js/hcuboid.js" + self.location.search
+                  ,"./hcuboid-interface.js" + self.location.search )
+
+
+function c2v(c){
+	return new Vec4(c[2],c[3],c[0],c[1]);
+}
+function mkMoves (ms){
+	let result = []
+	for (let m of ms) result.push({from:c2v(m.start), to:c2v(m.end)})
+	return result
+}
 
 class WorkerPlayer extends Player {
 	startClock(skipGraceAmount, skipAmount) { }
@@ -24,7 +37,7 @@ class WorkerGame extends Game {
 			do {
 				const r = gen.next();
 				if (r.done || r.value)
-					return postMessage(!!r.value);
+					return postMessage(r.value);
 			} while (performance.now() < stopTime);
 			this.searchTimeout = setTimeout(loop, 0);
 		};
@@ -34,11 +47,10 @@ class WorkerGame extends Game {
 		clearTimeout(this.searchTimeout);
 	}
 	*searchMate() {
-		let checks = [];
-		for (let l = -Math.min(this.timelineCount[0], this.timelineCount[1] + 1); l <= Math.min(this.timelineCount[0] + 1, this.timelineCount[1]); l++) {
-			// add logic here.
-			if (!this.getTimeline(l).isSubmitReady()) {
-				break;
+		for(let c of search(this)){
+			if(!c) yield c
+			else{
+				yield mkMoves(c)
 			}
 		}
 	};
