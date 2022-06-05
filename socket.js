@@ -238,7 +238,7 @@ class Wrapper {
 				message = playerName + " accepted the draw";
 				winner = -1;
 				break;
-			case "draw":
+			case "stalemate":
 				message = "Game ended in a stalemate.";
 				winner = -1;
 				break;
@@ -495,6 +495,8 @@ io.on("connection", socket => {
 			case "checkmate":
 				game.end(action, player, socket);
 				break;
+			case "stalemate":
+				game.end("stalemate", player, socket);
 			default:
 				return socket.emit("generic-error", "action doesn't exist.");
 		}

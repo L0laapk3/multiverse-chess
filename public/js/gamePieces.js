@@ -189,7 +189,7 @@ class King extends MPiece {
 				rookY += Math.sign(amount);
 				rook = this.board.pieces[pos.x][rookY];
 			} while (rookY >= 0 && rookY < 8 && !rook)
-			if (rook.type == "Rook") {
+			if (rook && rook.type == "Rook") {
 				checkCheckGroups.push(possibleCheckPositions);
 				castlePositions.push(pos);
 			}
