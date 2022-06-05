@@ -145,17 +145,17 @@ class Board {
 		} else {
 			// initialize new board
 			for (let side = 0; side < 2; side++) {
-				// for (let y = 0; y < 8; y++)
-				// 	new game.Pieces.Pawn(this, side, side ? 6 : 1, y);
+				for (let y = 0; y < 8; y++)
+					new game.Pieces.Pawn(this, side, side ? 6 : 1, y);
 				const x = side ? 7 : 0;
 				new game.Pieces.Rook(this, side, x, 0);
-				// new game.Pieces.Knight(this, side, x, 1);
-				// new game.Pieces.Bishop(this, side, x, 2);
-				// new game.Pieces.Queen(this, side, x, 3);
+				new game.Pieces.Knight(this, side, x, 1);
+				new game.Pieces.Bishop(this, side, x, 2);
+				new game.Pieces.Queen(this, side, x, 3);
 				new game.Pieces.King(this, side, x, 4);
-				// new game.Pieces.Bishop(this, side, x, 5);
-				// new game.Pieces.Knight(this, side, x, 6);
-				// new game.Pieces.Rook(this, side, x, 7);
+				new game.Pieces.Bishop(this, side, x, 5);
+				new game.Pieces.Knight(this, side, x, 6);
+				new game.Pieces.Rook(this, side, x, 7);
 			}
 		}
 
