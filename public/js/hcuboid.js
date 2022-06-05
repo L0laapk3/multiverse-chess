@@ -1,3 +1,5 @@
+// hypercuboid search algorithm by penteract
+
 
 const TSp = 1; // timeline spacing
 function* search(state) {
