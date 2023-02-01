@@ -980,6 +980,20 @@ class ClientGame extends Game {
 		
 		this.worker = new Worker("/js/gameCheckmate.js?" + localStorage.version);
 		this.worker.onmessage = hasWayOut => {
+			if (!hasWayOut.data) {
+				if (this.findChecks()) {
+					if (this.socket)
+						this.socket.emit("game-action", this.options.id, "checkmate", "user");
+					else
+						this.end(1 - this.turn, this.turn, "checkmate");
+				} else {
+					// todo: some checking, currently any player can report a stalemate and draw any game
+					if (this.socket)
+						this.socket.emit("game-action", this.options.id, "stalemate", "user");
+					else
+						this.end(-1, this.turn, "stalemate");
+				}
+			}
 			console.log("worker done, has way out of mate:", hasWayOut.data);
 		};
 		this.worker.postMessage(options);
@@ -1058,6 +1072,7 @@ class ClientGame extends Game {
 
 	end(winner, cause, reason, inPast) {
 		super.end(winner, cause, reason, inPast);
+		// todo: rethink this and how the socket interacts with this
 		if (this.worker)
 			this.worker.postMessage("stop");
 		let message;

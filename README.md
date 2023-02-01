@@ -1,6 +1,6 @@
 # multiverse chess
 
-This is the source code behind [multiversechess.com](https://multiversechess.com/). Heroku is used as free hosting. Feel free to join the [multiverse chess discord](https://discord.gg/UgVKykY)!
+This is the source code behind [multiversechess.com](https://multiversechess.com/). ~~Heroku~~ Fly.io is used as free hosting. Feel free to join the [multiverse chess discord](https://discord.gg/UgVKykY)!
 
 
 note: If I were to start over, I would select WebGL (or js+canvas) for rendering. However, I wanted to see how far DOM could be pushed.
@@ -14,3 +14,7 @@ The client visualisation and animations are layered ontop of the game logic clas
 * **public/js/client.js** and **public/js/clientPieces.js**: These files layer the animations by hooking into inherited methods from the core game logic above. Used in the client.
 * **public/js/main.js** and **public/js/menu.js**: These are the main files for the client, they control the user workflow and the main menu.
 * **index.js**, **socket.js** and **discordBridge.js**: These are the main files for the server, they manage all the games and notify the discord bridge when new games are created.
+
+### Credit
+
+Thanks a ton to [penteract](https://github.com/penteract) for his [hypercuboid checkmate search algorithm](https://github.com/penteract/hcuboid-ts).

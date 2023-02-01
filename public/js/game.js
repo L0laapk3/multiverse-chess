@@ -535,12 +535,14 @@ class Game {
 			return this.timelines[0][-1 - l];
 	}
 	findChecks() {
+		let checks = false;
 		for (let timelineDirection of this.timelines)
 			for (let timeline of timelineDirection) {
 				const board = timeline.boards[timeline.boards.length - 1];
 				if (board.turn == this.turn)
-					board.hasImminentChecks();
+					checks |= board.hasImminentChecks();
 			}
+		return checks;
 	}
 
 	checkChecks(checkGroups, checkBoard) {
