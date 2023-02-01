@@ -204,7 +204,7 @@ function testPresent(state, p, hc) {
             result[nonPassL] = Object.keys(hc[nonPassL]).filter(ix => ix != "pass");
         }
         // Only remove points where there isn't an active branch further back
-        for (let l = newL; sgn * l < Math.abs(minL) + TSp; l += sgn * TSp) {
+        for (let l = newL; sgn * l <= Math.abs(minL) + TSp; l += sgn * TSp) {
             if (!(l in hc))
                 break;
             if (!(l in result))
