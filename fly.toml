@@ -36,3 +36,7 @@ processes = []
     interval = "15s"
     restart_limit = 0
     timeout = "2s"
+
+[build]
+  builder = "paketobuildpacks/builder:base"
+  buildpacks = ["gcr.io/paketo-buildpacks/nodejs"]
