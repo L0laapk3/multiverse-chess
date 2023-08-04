@@ -2,16 +2,18 @@ require("./keepAlive")
 
 const express = require('express');
 const path = require('path');
-const IS_DEV = !process.env.HEROKU_RELEASE_VERSION;
-const PORT = IS_DEV ? 5000 : process.env.PORT;
-const VERSION = IS_DEV ? "dev-" + Date.now() : process.env.HEROKU_RELEASE_VERSION;
+const IS_DEV = !process.env.FLY_APP_NAME;
+const PORT = process.env.PORT || 5000;
+const VERSION = IS_DEV ? "dev-" + Date.now() : Date.now();
+
+console.log(process.env)
 
 const app = express();
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'favicon')));
 // app.use(function forceLiveDomain(req, res, next) {
-// 	if (req.get('Host') !== 'multiversechess.com')
+// 	if (req.get('Host') === 'multiverse-chess.fly.dev')
 // 		return res.redirect(301, 'https://multiversechess.com' + req.originalUrl);
 // 	return next();
 //   });
