@@ -10,11 +10,11 @@ const app = express();
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'favicon')));
-app.use(function forceLiveDomain(req, res, next) {
-	if (req.get('Host') === 'multiverse-chess.herokuapp.com')
-		return res.redirect(301, 'https://multiversechess.com' + req.originalUrl);
-	return next();
-  });
+// app.use(function forceLiveDomain(req, res, next) {
+// 	if (req.get('Host') !== 'multiversechess.com')
+// 		return res.redirect(301, 'https://multiversechess.com' + req.originalUrl);
+// 	return next();
+//   });
 app.use(function (req, res, next) {
 	res.locals = {
 		VERSION: VERSION
@@ -29,4 +29,3 @@ const server = app.listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
 require("./socket")(server, VERSION, IS_DEV);
 
-  
