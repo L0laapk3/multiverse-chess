@@ -50,7 +50,7 @@ const Piece = BasePiece => class extends BasePiece {
 		const piece = this.game.getPiece(pos, incrBoardNum);
 		if (piece === false)
 			return 0;
-			
+
 		if (piece)
 			return piece.side == this.side ? 0 : 2;
 		return 1;
@@ -104,8 +104,8 @@ class Pawn extends MPiece {
 		const takeGroup = [
 			new Vec4(this.side ? -1 : 1, -1, 0, 0),
 			new Vec4(this.side ? -1 : 1, 1, 0, 0),
-			new Vec4(0, 0, this.side ? -1 : 1, -1),
-			new Vec4(0, 0, this.side ? -1 : 1, 1),
+			new Vec4(0, 0, this.side ? -1 : 1, -2),
+			new Vec4(0, 0, this.side ? -1 : 1, 2),
 		];
 		for (let dir of takeGroup) {
 			const newPos = this.pos(incrBoardNum === this.board.l).add(dir);
