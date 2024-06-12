@@ -450,8 +450,6 @@ io.on("connection", socket => {
 				game.rejoin(socket);
 			} else {
 				game.spectate(socket);
-				// // todo: spectate
-				// socket.emit("matchmaking-join-error", "Game is full.");
 			}
 		}
 	});
