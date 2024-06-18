@@ -30,4 +30,3 @@ app.get('/[abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRTUVWXYZ2346789]{3}', (req, re
 const server = app.listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
 require("./socket")(server, VERSION, IS_DEV);
-
