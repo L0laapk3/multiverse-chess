@@ -81,14 +81,14 @@ client.on("guildMemberUpdate", (_, member) => {
 
 client.on("ready", async _ => {
 	connected = true;
-		
+
 	await Promise.all(client.guilds.cache.map(initializeGuild));
 });
 
 client.login(TOKEN);
 
 function handleReact(reaction, user, added) {
-	if (reaction.message.member && reaction.message.member.id == client.user.id && !reaction.me) {		
+	if (reaction.message.member && reaction.message.member.id == client.user.id && !reaction.me) {
 		const role = getInviteRole(reaction.message.guild);
 		if (role) {
 			const member = reaction.message.guild.members.cache.find(member => member.id === user.id);
@@ -139,7 +139,7 @@ function createMessage(ping, roleId) {
 			}
 			if (!timeStr.length)
 				timeStr = andSign + "0";
-			timeStr = (game.time.start[0] / 60000 % 60 == 0 ? game.time.start[0]/60/60/1000 + "h" : game.time.start[0] / 1000 % 60 == 0 ? game.time.start[0]/60/1000 : game.time.start[0]/1000 + "s") + timeStr; 
+			timeStr = (game.time.start[0] / 60000 % 60 == 0 ? game.time.start[0]/60/60/1000 + "h" : game.time.start[0] / 1000 % 60 == 0 ? game.time.start[0]/60/1000 : game.time.start[0]/1000 + "s") + timeStr;
 		}
 		if (!game.started)
 			descriptions.push(`**[join](https://multiversechess.com/${game.shortCode})** - **${game.mode}** - **${timeStr}** - vs ${game.opponent.name}`);
@@ -178,7 +178,7 @@ function broadcastToGuild(guild, silent, ping) {
 	for (const [cuid, channel] of guild.channels.cache) {
 		if (!isSuitableChannel(channel))
 			continue;
-		
+
 		const role = getInviteRole(guild);
 		if (role) {
 			const msg = channel.send(createMessage(ping && lastGames.length, role.id)).catch(console.error);
