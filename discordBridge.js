@@ -85,7 +85,7 @@ client.on("ready", async _ => {
 	await Promise.all(client.guilds.cache.map(initializeGuild));
 });
 
-client.login(TOKEN);
+// client.login(TOKEN);
 
 function handleReact(reaction, user, added) {
 	if (reaction.message.member && reaction.message.member.id == client.user.id && !reaction.me) {
