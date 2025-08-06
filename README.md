@@ -31,6 +31,14 @@ This is the source code behind [multiversechess.com](https://multiversechess.com
 - **index.js**, **socket.js** and **discordBridge.js**
   - The main files for the server, they manage all the games and notify the discord bridge when new games are created.
 
+## Running Locally
+
+To run the project locally for development:
+```bash
+pnpm install
+pnpm start
+```
+
 ## Contributions
 
 Contributions are welcome, feel free to open an issue or a pull request, and join our [discord server](https://discord.gg/UgVKykY)!
