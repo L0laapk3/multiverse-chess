@@ -334,7 +334,7 @@ class ClientBoard extends Board {
 
 		for (let arrow of this.arrows)
 			arrow.remove();
-		
+
 		this.el.removeAttribute("unsubmitted");
 		this.el.setAttribute("deleting", "");
 		this.el.setAttribute("animate-start", "");
@@ -495,7 +495,7 @@ class Chat {
 		window.addEventListener("mouseup", _ => this.historyEl.style.removeProperty("pointer-events"));
 		document.addEventListener("mouseleave", _ => this.historyEl.style.removeProperty("pointer-events"));
 		window.addEventListener("resize", _ => this.checkScrollbar());
-		
+
 		if (online) {
 			const submitEl = document.createElement("input");
 			submitEl.setAttribute("type", "submit");
@@ -504,7 +504,7 @@ class Chat {
 				this.send();
 			}
 			this.el.append(submitEl);
-	
+
 			this.inputEl = document.createElement("textarea");
 			this.inputEl.setAttribute("placeholder", game.options.player == -1 ? "Send a message" : "Send a message to your opponent");
 			this.inputEl.setAttribute("wrap", "soft");
@@ -586,7 +586,7 @@ class Chat {
 		el.append(textEl);
 		const stickToBottom = this.historyEl.scrollTop > this.historyEl.scrollHeight - this.historyEl.offsetHeight - 50;
 		this.historyEl.append(el);
-		
+
 		if (systemMessage) {
 			switch (message) {
 				case "disconnected":
@@ -771,7 +771,7 @@ class ClientPlayer extends Player {
 			return;
 		super.flag(fromStop);
 	}
-	setWinner() { 
+	setWinner() {
 		this.el.setAttribute("winner", "");
 	}
 }
@@ -781,9 +781,9 @@ class ClientGame extends Game {
 		super(options, socket);
 		this.socket = socket;
 		this.me = me;
-		
+
 		this.presentEl.style.setProperty("--t", this.present);
-		
+
 		this.panEl.onclick = e => {
 			if ((this.dragging || this.lastMouseWasDrag) && (e.button != 2))
 				return;
@@ -797,8 +797,8 @@ class ClientGame extends Game {
 		this.panEl.append(this.el);
 		this.containerEl.append(this.panEl);
 		root.append(this.containerEl);
-		
-		
+
+
 		if (options.moves && options.moves.length && this.localPlayer[this.turn] && options.moves[options.moves.length - 1].length)
 			this.undoButton.removeAttribute("disabled");
 
@@ -836,7 +836,7 @@ class ClientGame extends Game {
 				else
 					this.scrollX += deltaY;
 				zooming = false;
-			} 
+			}
 			if (!e.ctrlKey) {
 				clearTimeout(this.lastScrollEvent);
 				this.lastScrollEvent = setTimeout(_ => this.recentScrolls = 0, 20);
@@ -949,9 +949,9 @@ class ClientGame extends Game {
 		if (window.CSS.registerProperty) {
 			try {
 				window.CSS.registerProperty({
-					name: '--grace-pos', 
-					syntax: '<length-percentage>', 
-					initialValue: '0%', 
+					name: '--grace-pos',
+					syntax: '<length-percentage>',
+					initialValue: '0%',
 					inherits: true
 				});
 			} catch (_) {}
@@ -977,7 +977,7 @@ class ClientGame extends Game {
 				this.end(winner, cause, reason);
 			})
 		}
-		
+
 		this.worker = new Worker("/js/gameCheckmate.js?" + localStorage.version);
 		this.worker.onmessage = hasWayOut => {
 			if (!hasWayOut.data) {
@@ -994,7 +994,6 @@ class ClientGame extends Game {
 						this.end(-1, this.turn, "stalemate");
 				}
 			}
-			console.log("worker done, has way out of mate:", hasWayOut.data);
 		};
 		this.worker.postMessage(options);
 	}
@@ -1013,10 +1012,10 @@ class ClientGame extends Game {
 	instantiatePieceTypes() {
 		this.Pieces = MakePieces(ClientPiece(Piece(ClientBasePiece)));
 	}
-	
+
 	preInit() {
 		super.preInit();
-		
+
 		this.socket = this.localPlayer;
 		this.localPlayer = this.socket ? [this.options.player == 0, this.options.player == 1] : [true, true];
 		this.containerEl = document.createElement("chess-game-container");
@@ -1024,7 +1023,7 @@ class ClientGame extends Game {
 		this.controlsEl = document.createElement("chess-controls");
 		this.timelinesEl = document.createElement("chess-game-timelines");
 		this.el = document.createElement("chess-game");
-		
+
 		this.el.setAttribute("turn", this.turn ? "white" : "black");
 
 		this.presentEl = document.createElement("chess-game-present");
@@ -1036,7 +1035,7 @@ class ClientGame extends Game {
 		this.presentEl.append(this.presentWhiteMarker);
 		this.el.append(this.presentEl);
 		this.el.append(this.timelinesEl);
-		
+
 		this.undoButton = document.createElement("chess-button");
 		this.undoButton.setAttribute("type", "undo");
 		this.undoButton.setAttribute("disabled", "");
@@ -1049,7 +1048,7 @@ class ClientGame extends Game {
 		this.controlsEl.append(this.submitButton);
 		this.containerEl.append(this.controlsEl);
 		this.sideBarEl = document.createElement("chess-sidebar");
-		
+
 		this.containerEl.onmousedown = e => {
 			window.lastInteractedGame = this;
 		};
@@ -1059,13 +1058,13 @@ class ClientGame extends Game {
 			if (e.code == "KeyF")
 				this.submit();
 		})
-		
+
 		this.flipped = !this.localPlayer[1];
-		
+
 		if (this.flipped)
 			this.containerEl.setAttribute("flipped", "");
 	}
-	init() {		
+	init() {
 		super.init();
 		this.chat = new Chat(this, !!this.socket);
 	}
@@ -1120,7 +1119,7 @@ class ClientGame extends Game {
 		if (!fastForward) {
 			if (forcedUndo && this.currentTurnMoves.every(m => m.remoteMove))
 				this.undoButton.setAttribute("disabled", "");
-				
+
 			this.findChecks();
 		}
 	}
@@ -1138,7 +1137,7 @@ class ClientGame extends Game {
 			this.scrollY = center - this.scrollY;
 			this.OOBScrollY = center - this.OOBScrollY;
 			this.scrollYFlip = 0;
-		}		
+		}
 		if (this.resetOOB)
 			this.resetOOB = false;
 		else {
@@ -1300,7 +1299,7 @@ class ClientGame extends Game {
 			this.ghostPiece.remove();
 			this.ghostPiece = undefined;
 		}
-		
+
 		for (let timelineDirection of this.timelines)
 			for (let timeline of timelineDirection)
 				for (let board of timeline.boards) {

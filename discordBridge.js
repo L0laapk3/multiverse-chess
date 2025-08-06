@@ -1,7 +1,10 @@
-module.exports = function(IS_DEV) {
+import Discord from 'discord.js';
+
+export default function(IS_DEV) {
 
 
-const Discord = require('discord.js');
+const TEST_IN_DEBUG = false;
+
 const client = new Discord.Client();
 const TOKEN = process.env.DISCORD_BOT_TOKEN;
 const SUBSCRIBE_REACT = '🔔'; //'👀';
@@ -85,7 +88,8 @@ client.on("ready", async _ => {
 	await Promise.all(client.guilds.cache.map(initializeGuild));
 });
 
-client.login(TOKEN);
+if (!IS_DEV || TEST_IN_DEBUG)
+	client.login(TOKEN);
 
 function handleReact(reaction, user, added) {
 	if (reaction.message.member && reaction.message.member.id == client.user.id && !reaction.me) {
@@ -207,4 +211,4 @@ return {
 	},
 };
 
-};
+}

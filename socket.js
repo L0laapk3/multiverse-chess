@@ -1,16 +1,16 @@
-module.exports = function(server, VERSION, IS_DEV) {
+import { v4 as UUIDv4 } from 'uuid';
+import { Server as SocketIOServer } from "socket.io";
+import { performance } from 'perf_hooks';
+import { uniqueNamesGenerator, adjectives, animals } from 'unique-names-generator';
+import discord from './discordBridge.js';
+import fs from 'fs';
+import vm from 'vm';
 
-const UUID = require('uuid');
-const io = require("socket.io")(server);
-const {
-	performance
-} = require('perf_hooks');
-const discord = require('./discordBridge')(IS_DEV);
+export default function(server, VERSION, IS_DEV) {
 
-const { uniqueNamesGenerator, adjectives, animals } = require('unique-names-generator');
+const io = new SocketIOServer(server);
+const discordInstance = discord(IS_DEV);
 
-const fs = require('fs');
-const vm = require('vm');
 global.performance = performance;
 vm.runInThisContext(fs.readFileSync("public/js/gamePieces.js", "utf8"));
 vm.runInThisContext(fs.readFileSync("public/js/game.js", "utf8"));
@@ -97,7 +97,7 @@ class Wrapper {
 	constructor(playerOneSocket, options) {
 		options = options || {};
 		do {
-			this.id = UUID.v4();
+			this.id = UUIDv4();
 		} while (games[this.id]);
 		this._playerOneColor = (options.fixedPlayerColors ? options.playerOneColor === true : Math.random() > .5) ? 1 : 0;
 		this._playerUuids = [undefined, undefined];
@@ -132,7 +132,7 @@ class Wrapper {
 			for (let i = 0; i < 3; i++)
 				this.shortCode += shortCodeLetters[Math.floor(Math.random() * shortCodeLetters.length)];
 		} while (Object.values(games).some(g => g.shortCode == this.shortCode));
-		
+
 		this._gameObj = new ServerGame(this, this.serialize());
 		games[this.id] = this;
 	}
@@ -348,7 +348,7 @@ function updateSubscribers(created) {
 		sendGamesList(list, socket);
 }
 function updateDiscord(silent, ping) {
-	discord.update(Object.values(games).filter(g => (g.public || g.started) && !g.finished).map(g => g.list()), silent, ping);
+	discordInstance.update(Object.values(games).filter(g => (g.public || g.started) && !g.finished).map(g => g.list()), silent, ping);
 }
 
 
@@ -365,7 +365,7 @@ io.on("connection", socket => {
 		socket.emit("uuid-ok");
 	});
 	function newUuid() {
-		socket.uuid = UUID.v4();
+		socket.uuid = UUIDv4();
 		socket.name = uniqueNamesGenerator({ dictionaries: [adjectives, animals], seed: parseInt(socket.uuid, 16) });
 		socket.emit("uuid-new", socket.uuid);
 	}
@@ -526,7 +526,7 @@ io.on("connection", socket => {
 
 		if (message != message.trim() || message.length > 255)
 			return;
-			
+
 		const playerIndex = game._sockets.findIndex(s => s && s.uuid == socket.uuid);
 		if (playerIndex == -1)
 			return socket.emit("generic-error", "You must be connected to a game to chat in it.");

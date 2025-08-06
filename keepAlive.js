@@ -1,11 +1,8 @@
-// keepAlive.js
+import cron from 'cron';
+import fetch from 'node-fetch';
 
-const cron = require('cron');
-const fetch = require('node-fetch');
-
-// globals
 new cron.CronJob('0 */25 * * * *', () => {
 	fetch("https://multiversechess.com")
 		.then(res => console.log(`response-ok: ${res.ok}, status: ${res.status}`))
-		.catch(err => {});
+		.catch(err => console.error('Keep-alive fetch error:', err));
 }).start();

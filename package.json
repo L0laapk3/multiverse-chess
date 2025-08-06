@@ -2,9 +2,11 @@
   "name": "node-js-getting-started",
   "version": "0.3.0",
   "description": "A sample Node.js app using Express 4",
+  "type": "module",
   "engines": {
-    "node": "20.x"
+    "node": "22.x"
   },
+  "packageManager": "pnpm@9.0.0",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -14,14 +16,15 @@
     "cron": "^1.8.2",
     "discord.js": "^12.5.3",
     "ejs": "^3.1.10",
-    "express": "^4.17.1",
-    "socket.io": "^4.7.5",
-    "unique-names-generator": "^4.3.1",
-    "uuid": "^8.3.0"
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1",
+    "unique-names-generator": "^4.7.1",
+    "uuid": "^8.3.2",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "got": "^11.3.0",
-    "tape": "^4.7.0"
+    "got": "^11.8.6",
+    "tape": "^4.17.0"
   },
   "repository": {
     "type": "git",
