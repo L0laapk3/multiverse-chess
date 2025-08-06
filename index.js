@@ -27,7 +27,7 @@ app.use(function (req, res, next) {
 app.set('views', path.join(path.resolve(), 'views'));
 app.set('view engine', 'ejs');
 app.get('/', (req, res) => res.render('pages/index'));
-app.get('/[abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRTUVWXYZ2346789]{3}', (req, res) => res.render('pages/index'));
+app.get(/^\/[abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRTUVWXYZ2346789]{3}$/, (req, res) => res.render('pages/index'));
 const server = app.listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
 socketHandler(server, VERSION, IS_DEV);

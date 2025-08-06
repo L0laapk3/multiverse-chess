@@ -5,7 +5,14 @@ export default function(IS_DEV) {
 
 const TEST_IN_DEBUG = false;
 
-const client = new Discord.Client();
+const client = new Discord.Client({
+	intents: [
+		Discord.GatewayIntentBits.Guilds,
+		Discord.GatewayIntentBits.GuildMessages,
+		Discord.GatewayIntentBits.MessageContent,
+		Discord.GatewayIntentBits.GuildMessageReactions
+	]
+});
 const TOKEN = process.env.DISCORD_BOT_TOKEN;
 const SUBSCRIBE_REACT = '🔔'; //'👀';
 const UNSUBSCRIBE_REACT = '🔕'; //'😴';

@@ -18,6 +18,7 @@ vm.runInThisContext(fs.readFileSync("public/js/game.js", "utf8"));
 const shortCodeLetters = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRTUVWXYZ2346789";
 const games = {};
 const subscribers = [];
+const DEV_UUID = "5387a0ee-cbbd-4418-84a7-99ebf0649b73";
 
 class ServerGame extends Game {
 	constructor(wrapper, options) {
@@ -358,8 +359,8 @@ io.on("connection", socket => {
 	socket.connectedGames = [];
 	socket.on("uuid", uuid => {
 		socket.uuid = uuid;
-		socket.name = socket.uuid == "647775f8-3b8f-4a47-9744-f24bb24fbdfb" ? "L0laapk3" : uniqueNamesGenerator({ dictionaries: [adjectives, animals], seed: parseInt(socket.uuid, 16) });
-		socket.avatar = uuid == "647775f8-3b8f-4a47-9744-f24bb24fbdfb" ? "https://i.imgur.com/XUso8bL.jpg" : undefined;
+		socket.name = socket.uuid == DEV_UUID ? "L0laapk3" : uniqueNamesGenerator({ dictionaries: [adjectives, animals], seed: parseInt(socket.uuid, 16) });
+		socket.avatar = uuid == DEV_UUID ? "https://i.imgur.com/XUso8bL.jpg" : undefined;
 		if (!checkUuid())
 			return;
 		socket.emit("uuid-ok");
