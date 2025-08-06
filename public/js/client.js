@@ -511,6 +511,7 @@ class Chat {
 			this.inputEl.setAttribute("maxlength", "255");
 			this.inputEl.setAttribute("enterkeyhint", "send");
 			this.inputEl.onkeydown = e => {
+				e.stopPropagation();
 				this.send(e);
 				this.resizeText(e);
 			};

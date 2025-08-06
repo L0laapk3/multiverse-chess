@@ -35,7 +35,7 @@ This is the source code behind [multiversechess.com](https://multiversechess.com
 
 To run the project locally for development:
 ```bash
-pnpm install
+pnpm i # Install requirements
 pnpm start
 ```
 
