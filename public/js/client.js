@@ -1197,7 +1197,8 @@ class ClientGame extends Game {
 			for (let timeline of timelineDirection)
 				if (timeline.end > maxT)
 					maxT = timeline.end;
-		this.boardsX = maxT - this.getTimeline(0).start + 1;
+		this.boardsXStart = this.getTimeline(0).start;
+		this.boardsX = maxT - this.boardsXStart + 1;
 		this.boardsY = this.timelineCount[0] + this.timelineCount[1] + 1;
 		this.scrollYOffset += this.timelineCount[this.flipped ? 1 : 0] - this.lastTimelineCount[this.flipped ? 1 : 0];
 		this.lastTimelineCount[0] = this.timelineCount[0];
