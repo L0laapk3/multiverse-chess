@@ -28,15 +28,15 @@ let lastGames = [];
 
 
 function isSuitableChannel(channel) {
-	if (channel.type != "text" || channel.deleted)
+	if (channel.type !== Discord.ChannelType.GuildText || channel.deleted)
 		return false;
-	if (!channel.guild.me.permissionsIn(channel).has(Discord.Permissions.FLAGS.VIEW_CHANNEL | Discord.Permissions.FLAGS.SEND_MESSAGES | Discord.Permissions.FLAGS.ADD_REACTIONS | Discord.Permissions.FLAGS.MANAGE_CHANNELS))
+	if (!channel.guild.members.me.permissionsIn(channel).has([Discord.PermissionFlagsBits.ViewChannel, Discord.PermissionFlagsBits.SendMessages, Discord.PermissionFlagsBits.AddReactions, Discord.PermissionFlagsBits.ManageChannels]))
 		return false;
 	return true;
 }
 
 function getInviteRole(guild) {
-	const role = guild.me.roles.cache.find(role => role.editable && role.name.toLowerCase().includes("invite"));
+	const role = guild.members.me.roles.cache.find(role => role.editable && role.name.toLowerCase().includes("invite"));
 	if (!role)
 		console.error(`could not find invite role in guild '${guild.name}'!`);
 	return role;
@@ -47,7 +47,7 @@ async function initializeGuild(guild) {
 	if (IS_DEV && guid != "763763925140635659")
 		return;
 	try {
-		if (!guild.me.hasPermission(Discord.Permissions.FLAGS.MANAGE_ROLES))
+		if (!guild.members.me.permissions.has(Discord.PermissionFlagsBits.ManageRoles))
 			return console.error(`No MANAGE_ROLES permission in guild '${guild.name}'!`);
 		if (!getInviteRole(guild))
 			return;
@@ -99,17 +99,17 @@ if (!IS_DEV || TEST_IN_DEBUG)
 	client.login(TOKEN);
 
 function handleReact(reaction, user, added) {
-	if (reaction.message.member && reaction.message.member.id == client.user.id && !reaction.me) {
+	if (reaction.message.author && reaction.message.author.id == client.user.id && !reaction.me) {
 		const role = getInviteRole(reaction.message.guild);
 		if (role) {
 			const member = reaction.message.guild.members.cache.find(member => member.id === user.id);
 			if (member) {
 				if (reaction.emoji.name == SUBSCRIBE_REACT) {
 					member.roles.add(role).catch(console.warn);
-					reaction.message.reactions.cache.get(UNSUBSCRIBE_REACT).users.remove(user.id).catch(console.warn);
+					reaction.message.reactions.cache.get(UNSUBSCRIBE_REACT)?.users.remove(user.id).catch(console.warn);
 				} else if (reaction.emoji.name == UNSUBSCRIBE_REACT) {
 					member.roles.remove(role).catch(console.warn);
-					reaction.message.reactions.cache.get(SUBSCRIBE_REACT).users.remove(user.id).catch(console.warn);
+					reaction.message.reactions.cache.get(SUBSCRIBE_REACT)?.users.remove(user.id).catch(console.warn);
 				}
 			}
 		}
@@ -123,7 +123,7 @@ let existingMessages = {};
 
 
 function createMessage(ping, roleId) {
-	const embed = new Discord.MessageEmbed();
+	const embed = new Discord.EmbedBuilder();
 	// embed.setColor('#000000');
 	embed.setTitle('Public Games');
 	// embed.setAuthor('Some name', 'https://i.imgur.com/wSTFkRM.png', 'https://discord.js.org')
@@ -162,10 +162,10 @@ function createMessage(ping, roleId) {
 	else
 		embed.setDescription(descriptions.join('\n'));
 	// embed.setTimestamp();
-	embed.setFooter('multiversechess.com');
+	embed.setFooter({ text: 'multiversechess.com' });
 	return {
 		content: (IS_DEV ? "THIS IS A TEST  " : "") + (ping ? `<@${IS_DEV ? '180017294657716225' : '&' + roleId}>` : ''),
-		embed: embed,
+		embeds: [embed],
 	};
 }
 
@@ -175,7 +175,7 @@ function broadcastToGuild(guild, silent, ping) {
 		if (silent) {
 			const role = getInviteRole(guild);
 			existingMessages[guid].then(message => {
-				message.edit(createMessage(false, role.id).embed).catch(console.error);
+				message.edit(createMessage(false, role.id)).catch(console.error);
 			});
 			return;
 		} else {

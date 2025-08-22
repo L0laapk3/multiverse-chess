@@ -5,8 +5,6 @@ kill_signal = "SIGINT"
 kill_timeout = 5
 processes = []
 
-[env]
-
 [experimental]
   allowed_public_ports = []
   auto_rollback = true
@@ -38,5 +36,5 @@ processes = []
     timeout = "2s"
 
 [build]
-  builder = "paketobuildpacks/builder:base"
-  buildpacks = ["gcr.io/paketo-buildpacks/nodejs"]
+  builder = "paketobuildpacks/builder-jammy-base"
+  buildpacks = ["docker.io/paketobuildpacks/nodejs"]

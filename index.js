@@ -7,8 +7,6 @@ const IS_DEV = !process.env.FLY_APP_NAME;
 const PORT = process.env.PORT || 5000;
 const VERSION = IS_DEV ? "dev-" + Date.now() : Date.now();
 
-console.log(process.env)
-
 const app = express();
 
 app.use(express.static(path.join(path.resolve(), 'public')));

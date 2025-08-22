@@ -9,8 +9,7 @@
   "packageManager": "pnpm@9.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "node test.js"
+    "start": "node index.js"
   },
   "dependencies": {
     "cron": "^4.3.3",

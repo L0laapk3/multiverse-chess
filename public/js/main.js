@@ -6,8 +6,8 @@ let loaded = false, gameOptions;
 window.onload = _ => {
 	loaded = true;
 	window.menu = new Menu(socket);
-	if (!window.chrome)
-		displayToast("This website is best viewed in a chromium based browser");
+	if (navigator.userAgent.indexOf("Firefox") === -1 && !window.chrome)
+		displayToast("This website is best viewed in firefox or a chromium browser");
 	if (gameOptions)
 		startGame(gameOptions);
 };
