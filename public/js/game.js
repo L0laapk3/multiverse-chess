@@ -286,18 +286,18 @@ class Move {
 			const targetOriginBoard = game.getTimeline(targetPos.l).getBoard(targetPos.t);
 			this.usedBoards = [sourcePiece.board];
 			if (!targetOriginBoard.active) {
-				console.log("create new timeline");
+				// console.log("create new timeline");
 				this.sourceBoard = game.instantiateBoard(sourcePiece.board, undefined, undefined, undefined, fastForward);
 				const newL = ++game.timelineCount[targetOriginBoard.turn] * (targetOriginBoard.turn ? 1 : -1);
 				game.instantiateTimeline(newL, targetOriginBoard.t + 1, this.sourceBoard.l, fastForward);
 				this.targetBoard = game.instantiateBoard(targetOriginBoard, true, newL);
 			} else if (sourcePiece.board != targetOriginBoard) {
-				console.log("move across timelines");
+				// console.log("move across timelines");
 				this.sourceBoard = game.instantiateBoard(sourcePiece.board, undefined, undefined, undefined, fastForward);
 				this.targetBoard = game.instantiateBoard(targetOriginBoard, undefined, undefined, undefined, fastForward);
 				this.usedBoards.push(targetOriginBoard);
 			} else {
-				console.log("move on a single board");
+				// console.log("move on a single board");
 				this.sourceBoard = this.targetBoard = game.instantiateBoard(targetOriginBoard, undefined, undefined, undefined, fastForward);
 				this.isInterDimensionalMove = false;
 			}

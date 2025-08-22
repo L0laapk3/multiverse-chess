@@ -997,6 +997,7 @@ class ClientGame extends Game {
 			}
 		};
 		this.worker.postMessage(options);
+		this.movePresent(false);
 	}
 	instantiateMove(sourcePiece, targetPos, promotionTo, remoteMove, fastForward) {
 		return new ClientMove(this, sourcePiece, targetPos, promotionTo, remoteMove, fastForward);
