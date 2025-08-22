@@ -286,18 +286,18 @@ class Move {
 			const targetOriginBoard = game.getTimeline(targetPos.l).getBoard(targetPos.t);
 			this.usedBoards = [sourcePiece.board];
 			if (!targetOriginBoard.active) {
-				// console.log("create new timeline");
+				console.log("create new timeline");
 				this.sourceBoard = game.instantiateBoard(sourcePiece.board, undefined, undefined, undefined, fastForward);
 				const newL = ++game.timelineCount[targetOriginBoard.turn] * (targetOriginBoard.turn ? 1 : -1);
 				game.instantiateTimeline(newL, targetOriginBoard.t + 1, this.sourceBoard.l, fastForward);
 				this.targetBoard = game.instantiateBoard(targetOriginBoard, true, newL);
 			} else if (sourcePiece.board != targetOriginBoard) {
-				// console.log("move across timelines");
+				console.log("move across timelines");
 				this.sourceBoard = game.instantiateBoard(sourcePiece.board, undefined, undefined, undefined, fastForward);
 				this.targetBoard = game.instantiateBoard(targetOriginBoard, undefined, undefined, undefined, fastForward);
 				this.usedBoards.push(targetOriginBoard);
 			} else {
-				// console.log("move on a single board");
+				console.log("move on a single board");
 				this.sourceBoard = this.targetBoard = game.instantiateBoard(targetOriginBoard, undefined, undefined, undefined, fastForward);
 				this.isInterDimensionalMove = false;
 			}
@@ -365,7 +365,9 @@ class Game {
 		this.instantiateTimeline(0, -1, undefined, true); // timeline starts at board 1
 
 		// hack to add turn zero variant
-		this.getTimeline(0).setBoard(-1, this.instantiateBoard(0, -1, !this.turn, true));
+		let turnZeroBoard = this.instantiateBoard(0, -1, 1 - this.turn, true);
+		turnZeroBoard.makeInactive();
+		this.getTimeline(0).setBoard(-1, turnZeroBoard);
 		this.getTimeline(0).setBoard(0, this.instantiateBoard(0, 0, this.turn, true)); // even moves must be for white and t cannot be negative so start at 1
 
 		this.arrowCount = 0;
@@ -600,7 +602,7 @@ class Game {
 	}
 
 	getPiece(pos, incrBoardNum) {
-		if (pos.x < 0 || pos.x >= 8 || pos.y < 0 || pos.y >= 8 || pos.t < 0)
+		if (pos.x < 0 || pos.x >= 8 || pos.y < 0 || pos.y >= 8)
 			return false;
 		const timeline = this.getTimeline(pos.l);
 		if (!timeline)
