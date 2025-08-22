@@ -358,15 +358,15 @@ class Game {
 		else
 			this.finished = false;
 
-		this.present = 2;
+		this.present = 0;
 		this.timelines = [ [], [] ];
 		this.timelineCount = [0, 0];
 		this.lastTimelineCount = [0, 0];
-		this.instantiateTimeline(0, 1, undefined, true); // timeline starts at board 1
+		this.instantiateTimeline(0, -1, undefined, true); // timeline starts at board 1
 
 		// hack to add turn zero variant
-		this.getTimeline(0).setBoard(1, this.instantiateBoard(0, 1, !this.turn, true));
-		this.getTimeline(0).setBoard(2, this.instantiateBoard(0, 2, this.turn, true)); // even moves must be for white and t cannot be negative so start at 1
+		this.getTimeline(0).setBoard(-1, this.instantiateBoard(0, -1, !this.turn, true));
+		this.getTimeline(0).setBoard(0, this.instantiateBoard(0, 0, this.turn, true)); // even moves must be for white and t cannot be negative so start at 1
 
 		this.arrowCount = 0;
 
